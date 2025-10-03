@@ -14,7 +14,7 @@
     "/api/Courses" : {
       "get" : {
         "tags" : [ "Courses" ],
-        "summary" : "查詢課程列表（學生看可選課程，老師看自己管理的課程）",
+        "summary" : "查詢課程列表（學生看可選課程，老師則可以看自己管理的課程）",
         "parameters" : [ {
           "name" : "q",
           "in" : "query",
