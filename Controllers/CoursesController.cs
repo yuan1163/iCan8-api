@@ -1,10 +1,10 @@
 ﻿using iCAN8.Api.Dtos;
-using LearningPlatform.Api.Services;
+using iCAN8.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
-namespace LearningPlatform.Api.Controllers;
+namespace iCAN8.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

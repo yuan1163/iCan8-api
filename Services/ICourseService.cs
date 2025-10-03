@@ -1,6 +1,6 @@
 ﻿using iCAN8.Api.Dtos;
 
-namespace LearningPlatform.Api.Services;
+namespace iCAN8.Api.Services;
 
 public interface ICourseService
 {

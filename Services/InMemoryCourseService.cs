@@ -1,7 +1,7 @@
 ﻿using iCAN8.Api.Dtos;
 using System.Collections.Concurrent;
 
-namespace LearningPlatform.Api.Services;
+namespace iCAN8.Api.Services;
 
 public class InMemoryCourseService : ICourseService
 {
