@@ -55,6 +55,9 @@ builder.Services.AddSingleton<IUserStore, InMemoryUserStore>();
 builder.Services.AddSingleton<IRefreshTokenStore, InMemoryRefreshTokenStore>();
 builder.Services.AddSingleton<ITokenService, JwtTokenService>();
 
+// 課程服務
+builder.Services.AddSingleton<ICourseService, InMemoryCourseService>();
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
