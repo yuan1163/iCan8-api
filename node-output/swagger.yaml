@@ -1,0 +1,675 @@
+{
+  "openapi" : "3.0.4",
+  "info" : {
+    "title" : "Digital Learning API",
+    "version" : "1.0.0"
+  },
+  "servers" : [ {
+    "url" : "/"
+  } ],
+  "security" : [ {
+    "bearerAuth" : [ ]
+  } ],
+  "paths" : {
+    "/api/Courses" : {
+      "get" : {
+        "tags" : [ "Courses" ],
+        "summary" : "查詢課程列表（學生看可選課程，老師看自己管理的課程）",
+        "parameters" : [ {
+          "name" : "q",
+          "in" : "query",
+          "required" : false,
+          "style" : "form",
+          "explode" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/CourseDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Courses" ],
+        "summary" : "老師新增課程",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseCreateDto"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseCreateDto"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseCreateDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CourseDto"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Unauthorized",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Courses/{courseId}" : {
+      "get" : {
+        "tags" : [ "Courses" ],
+        "summary" : "取得課程",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CourseDto"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Courses" ],
+        "summary" : "老師更新課程",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseUpdateDto"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseUpdateDto"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseUpdateDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CourseDto"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Courses" ],
+        "summary" : "老師刪除課程",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "204" : {
+            "description" : "No Content"
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Courses/{courseId}/outline" : {
+      "get" : {
+        "tags" : [ "Courses" ],
+        "summary" : "取得課程大綱/進度",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CourseOutlineDto"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Courses" ],
+        "summary" : "老師更新課程大綱/進度",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseOutlineDto"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseOutlineDto"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CourseOutlineDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Courses/{courseId}/materials" : {
+      "get" : {
+        "tags" : [ "Courses" ],
+        "summary" : "列出課程教材",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "OK",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "type" : "array",
+                  "items" : {
+                    "$ref" : "#/components/schemas/MaterialDto"
+                  }
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "Courses" ],
+        "summary" : "老師新增教材（文字或影音連結）",
+        "parameters" : [ {
+          "name" : "courseId",
+          "in" : "path",
+          "required" : true,
+          "style" : "simple",
+          "explode" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MaterialCreateDto"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MaterialCreateDto"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/MaterialCreateDto"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "Created",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/MaterialDto"
+                }
+              }
+            }
+          },
+          "403" : {
+            "description" : "Forbidden",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404" : {
+            "description" : "Not Found",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "CourseCreateDto" : {
+        "required" : [ "title" ],
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "課程名稱"
+          },
+          "description" : {
+            "maxLength" : 2000,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "課程描述",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "CourseDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "title" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "description" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "teacherId" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "progressPct" : {
+            "type" : "number",
+            "format" : "double",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "CourseOutlineDto" : {
+        "type" : "object",
+        "properties" : {
+          "modules" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/ModuleDto"
+            }
+          }
+        },
+        "additionalProperties" : false
+      },
+      "CourseUpdateDto" : {
+        "required" : [ "title" ],
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "課程名稱"
+          },
+          "description" : {
+            "maxLength" : 2000,
+            "minLength" : 0,
+            "type" : "string",
+            "description" : "課程描述",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "MaterialCreateDto" : {
+        "required" : [ "courseId", "title", "type" ],
+        "type" : "object",
+        "properties" : {
+          "courseId" : {
+            "minLength" : 1,
+            "type" : "string"
+          },
+          "type" : {
+            "minLength" : 1,
+            "pattern" : "text|video",
+            "type" : "string"
+          },
+          "title" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "content" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "videoUrl" : {
+            "type" : "string",
+            "format" : "uri",
+            "nullable" : true
+          },
+          "durationSeconds" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "MaterialDto" : {
+        "type" : "object",
+        "properties" : {
+          "id" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "courseId" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "type" : {
+            "type" : "string",
+            "description" : "text 或 video",
+            "nullable" : true
+          },
+          "title" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "content" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "videoUrl" : {
+            "type" : "string",
+            "format" : "uri",
+            "nullable" : true
+          },
+          "durationSeconds" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "ModuleDto" : {
+        "required" : [ "title" ],
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "order" : {
+            "maximum" : 2147483647,
+            "minimum" : 1,
+            "type" : "integer",
+            "description" : "排序序號（1-based）",
+            "format" : "int32"
+          },
+          "items" : {
+            "type" : "array",
+            "nullable" : true,
+            "items" : {
+              "$ref" : "#/components/schemas/ModuleItemDto"
+            }
+          }
+        },
+        "additionalProperties" : false
+      },
+      "ModuleItemDto" : {
+        "required" : [ "title", "type" ],
+        "type" : "object",
+        "properties" : {
+          "title" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "type" : "string"
+          },
+          "type" : {
+            "minLength" : 1,
+            "pattern" : "material|quiz|assignment",
+            "type" : "string",
+            "description" : "項目類型"
+          },
+          "refId" : {
+            "type" : "string",
+            "description" : "對應教材或考試的 Id（可為 null 代表尚未連結）",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "ProblemDetails" : {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "title" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "status" : {
+            "type" : "integer",
+            "format" : "int32",
+            "nullable" : true
+          },
+          "detail" : {
+            "type" : "string",
+            "nullable" : true
+          },
+          "instance" : {
+            "type" : "string",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : { }
+      }
+    },
+    "securitySchemes" : {
+      "bearerAuth" : {
+        "type" : "http",
+        "description" : "輸入格式：Bearer {你的JWT}",
+        "scheme" : "bearer",
+        "bearerFormat" : "JWT"
+      }
+    }
+  }
+}
