@@ -1,7 +1,8 @@
 {
   "openapi" : "3.0.4",
   "info" : {
-    "title" : "Digital Learning API",
+    "title" : "數位學習平台(iCAN8) API",
+    "description" : "數位學習平台(iCAN8) API",
     "version" : "1.0.0"
   },
   "servers" : [ {
@@ -11,13 +12,170 @@
     "bearerAuth" : [ ]
   } ],
   "paths" : {
+    "/api/Auth/login" : {
+      "post" : {
+        "tags" : [ "Auth" ],
+        "summary" : "使用者登入",
+        "description" : "使用帳號密碼登入系統，成功後會返回 access token 和 refresh token。\n- Access token 用於後續 API 呼叫的認證\n- Refresh token 用於在 access token 過期後取得新的 token\n- 此API不需要帶 Authorization header\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "登入成功，返回 token 資訊",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "認證失敗，帳號或密碼錯誤",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security" : [ ]
+      }
+    },
+    "/api/Auth/refresh" : {
+      "post" : {
+        "tags" : [ "Auth" ],
+        "summary" : "更新 Access Token",
+        "description" : "當 access token 過期時，使用 refresh token 來取得新的 access token。\n- 需要在 request body 中提供有效的 refresh token\n- 成功後會返回新的 access token 和 refresh token\n- 舊的 refresh token 將會失效\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RefreshRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "Token 更新成功",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginResponse"
+                }
+              }
+            }
+          },
+          "400" : {
+            "description" : "請求格式錯誤",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "401" : {
+            "description" : "Refresh token 無效或已過期",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/Auth/logout" : {
+      "post" : {
+        "tags" : [ "Auth" ],
+        "summary" : "使用者登出",
+        "description" : "登出系統，並使 refresh token 失效。\n- 登出後該 refresh token 將無法再用於更新 access token\n- 建議在登出後清除客戶端儲存的所有 token\n",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LogoutRequest"
+              }
+            },
+            "text/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LogoutRequest"
+              }
+            },
+            "application/*+json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LogoutRequest"
+              }
+            }
+          }
+        },
+        "responses" : {
+          "204" : {
+            "description" : "登出成功，無返回內容"
+          }
+        }
+      }
+    },
+    "/api/Auth/me" : {
+      "get" : {
+        "tags" : [ "Auth" ],
+        "summary" : "取得當前使用者資訊",
+        "description" : "根據 Authorization header 中的 token，返回當前登入使用者的資訊。\n- 可用於驗證 token 是否仍然有效\n- 可用於取得使用者的角色、權限等資訊\n",
+        "responses" : {
+          "200" : {
+            "description" : "成功返回使用者資訊",
+            "content" : {
+              "application/json" : {
+                "schema" : { }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/Courses" : {
       "get" : {
         "tags" : [ "Courses" ],
-        "summary" : "查詢課程列表（學生看可選課程，老師則可以看自己管理的課程）",
+        "summary" : "查詢課程列表",
+        "description" : "根據使用者角色返回不同的課程列表：\n- **學生**: 可以看到所有已選修的課程\n- **老師**: 可以看到自己管理的課程\n\n支援關鍵字搜尋功能，可透過 q 參數進行課程名稱或描述的模糊搜尋。\n",
         "parameters" : [ {
           "name" : "q",
           "in" : "query",
+          "description" : "搜尋關鍵字，用於搜尋課程名稱或描述",
           "required" : false,
           "style" : "form",
           "explode" : true,
@@ -27,7 +185,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK",
+            "description" : "成功返回課程列表",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -43,7 +201,8 @@
       },
       "post" : {
         "tags" : [ "Courses" ],
-        "summary" : "老師新增課程",
+        "summary" : "新增課程",
+        "description" : "老師建立新課程。\n- **權限**: 僅限老師、管理者角色\n- 課程建立後，若身分為老師，自動成為該課程的授課老師、若為管理者，則需指定課程老師\n- 建立時只需提供基本資訊（名稱、描述），課程大綱和教材可稍後新增\n",
         "requestBody" : {
           "content" : {
             "application/json" : {
@@ -65,7 +224,7 @@
         },
         "responses" : {
           "201" : {
-            "description" : "Created",
+            "description" : "課程建立成功，返回完整課程資訊",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -75,7 +234,7 @@
             }
           },
           "401" : {
-            "description" : "Unauthorized",
+            "description" : "未登入或 token 無效",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -90,10 +249,12 @@
     "/api/Courses/{courseId}" : {
       "get" : {
         "tags" : [ "Courses" ],
-        "summary" : "取得課程",
+        "summary" : "取得課程詳細資訊",
+        "description" : "取得指定課程的詳細資訊，包含課程名稱、描述、授課老師等。\n- 學生可查看已選修或可選修的課程\n- 老師可查看自己管理的課程\n- 如果是學生已選修的課程，會包含學習進度百分比（progressPct）\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -103,7 +264,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK",
+            "description" : "成功返回課程資訊",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -113,7 +274,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -126,10 +287,12 @@
       },
       "put" : {
         "tags" : [ "Courses" ],
-        "summary" : "老師更新課程",
+        "summary" : "更新課程資訊",
+        "description" : "老師更新課程的基本資訊（名稱、描述）。\n- **權限**: 僅限該課程的授課老師或管理者\n- 只能更新課程的基本資訊，大綱和教材需使用其他端點更新\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -158,7 +321,7 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK",
+            "description" : "課程更新成功，返回更新後的課程資訊",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -168,7 +331,7 @@
             }
           },
           "403" : {
-            "description" : "Forbidden",
+            "description" : "無權限更新此課程（非授課老師）",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -178,7 +341,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -191,10 +354,12 @@
       },
       "delete" : {
         "tags" : [ "Courses" ],
-        "summary" : "老師刪除課程",
+        "summary" : "刪除課程",
+        "description" : "老師刪除課程。\n- **權限**: 僅限該課程的授課老師或管理者\n- 刪除課程會一併刪除相關的大綱、教材、作業等所有資料\n- 此操作無法復原，請謹慎使用\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -204,10 +369,10 @@
         } ],
         "responses" : {
           "204" : {
-            "description" : "No Content"
+            "description" : "課程刪除成功，無返回內容"
           },
           "403" : {
-            "description" : "Forbidden",
+            "description" : "無權限刪除此課程（非授課老師）",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -217,7 +382,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -232,10 +397,12 @@
     "/api/Courses/{courseId}/outline" : {
       "get" : {
         "tags" : [ "Courses" ],
-        "summary" : "取得課程大綱/進度",
+        "summary" : "取得課程大綱",
+        "description" : "取得課程的完整大綱結構，包含所有模組（章節）和模組項目。\n- 模組項目可能是教材（material）、測驗（quiz）或作業（assignment）\n- 每個項目會標示類型和對應的資源 ID（refId）\n- 學生可用此端點查看課程架構和學習路徑\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -245,7 +412,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK",
+            "description" : "成功返回課程大綱",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -255,7 +422,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -268,10 +435,12 @@
       },
       "put" : {
         "tags" : [ "Courses" ],
-        "summary" : "老師更新課程大綱/進度",
+        "summary" : "更新課程大綱",
+        "description" : "老師或管理者更新課程大綱，包含新增、修改、刪除模組和模組項目。\n- **權限**: 僅限該課程的授課老師\n- 需要提供完整的大綱結構（會完全取代現有大綱）\n- 可以調整模組順序、新增或刪除學習項目\n- 模組項目的 refId 可以先設為 null，待建立對應資源後再更新\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -300,10 +469,10 @@
         },
         "responses" : {
           "200" : {
-            "description" : "OK"
+            "description" : "課程大綱更新成功"
           },
           "403" : {
-            "description" : "Forbidden",
+            "description" : "無權限更新此課程大綱（非授課老師或管理者）",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -313,7 +482,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -329,9 +498,11 @@
       "get" : {
         "tags" : [ "Courses" ],
         "summary" : "列出課程教材",
+        "description" : "取得指定課程的所有教材列表。\n- 教材分為兩種類型：文字教材（text）和影片教材（video）\n- 文字教材包含 content 欄位\n- 影片教材包含 videoUrl 和 durationSeconds 欄位\n- 學生和老師都可以查看教材列表\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -341,7 +512,7 @@
         } ],
         "responses" : {
           "200" : {
-            "description" : "OK",
+            "description" : "成功返回教材列表",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -354,7 +525,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -367,10 +538,12 @@
       },
       "post" : {
         "tags" : [ "Courses" ],
-        "summary" : "老師新增教材（文字或影音連結）",
+        "summary" : "新增課程教材",
+        "description" : "老師為課程新增教材，支援文字和影片兩種類型。\n- **權限**: 僅限該課程的授課老師\n- **文字教材 (type=text)**: 需提供 content 欄位\n- **影片教材 (type=video)**: 需提供 videoUrl，可選填 durationSeconds\n- 新增後可在課程大綱中引用該教材（透過 refId）\n",
         "parameters" : [ {
           "name" : "courseId",
           "in" : "path",
+          "description" : "課程的唯一識別碼",
           "required" : true,
           "style" : "simple",
           "explode" : false,
@@ -399,7 +572,7 @@
         },
         "responses" : {
           "201" : {
-            "description" : "Created",
+            "description" : "教材建立成功，返回完整教材資訊",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -409,7 +582,7 @@
             }
           },
           "403" : {
-            "description" : "Forbidden",
+            "description" : "無權限新增教材（非授課老師或管理者）",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -419,7 +592,7 @@
             }
           },
           "404" : {
-            "description" : "Not Found",
+            "description" : "找不到指定的課程",
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -459,22 +632,27 @@
         "properties" : {
           "id" : {
             "type" : "string",
+            "description" : "課程唯一識別碼",
             "nullable" : true
           },
           "title" : {
             "type" : "string",
+            "description" : "課程名稱",
             "nullable" : true
           },
           "description" : {
             "type" : "string",
+            "description" : "課程描述",
             "nullable" : true
           },
           "teacherId" : {
             "type" : "string",
+            "description" : "授課老師的使用者 ID",
             "nullable" : true
           },
           "progressPct" : {
             "type" : "number",
+            "description" : "學習進度百分比（0-100），僅學生查看已選修課程時返回",
             "format" : "double",
             "nullable" : true
           }
@@ -486,6 +664,7 @@
         "properties" : {
           "modules" : {
             "type" : "array",
+            "description" : "課程模組（章節）列表",
             "nullable" : true,
             "items" : {
               "$ref" : "#/components/schemas/ModuleDto"
@@ -514,35 +693,89 @@
         },
         "additionalProperties" : false
       },
+      "LoginRequest" : {
+        "type" : "object",
+        "properties" : {
+          "username" : {
+            "type" : "string",
+            "description" : "使用者帳號",
+            "nullable" : true
+          },
+          "password" : {
+            "type" : "string",
+            "description" : "使用者密碼",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "LoginResponse" : {
+        "type" : "object",
+        "properties" : {
+          "accessToken" : {
+            "type" : "string",
+            "description" : "存取權杖，用於後續 API 請求的認證",
+            "nullable" : true
+          },
+          "expiresIn" : {
+            "type" : "integer",
+            "description" : "Access token 有效期限（秒）",
+            "format" : "int32"
+          },
+          "refreshToken" : {
+            "type" : "string",
+            "description" : "更新權杖，用於在 access token 過期後取得新的 token",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
+      "LogoutRequest" : {
+        "type" : "object",
+        "properties" : {
+          "refreshToken" : {
+            "type" : "string",
+            "description" : "要失效的 refresh token",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
+      },
       "MaterialCreateDto" : {
         "required" : [ "courseId", "title", "type" ],
         "type" : "object",
         "properties" : {
           "courseId" : {
             "minLength" : 1,
-            "type" : "string"
+            "type" : "string",
+            "description" : "所屬課程 ID"
           },
           "type" : {
             "minLength" : 1,
             "pattern" : "text|video",
-            "type" : "string"
+            "type" : "string",
+            "description" : "教材類型：text（文字）或 video（影片）"
           },
           "title" : {
             "maxLength" : 200,
             "minLength" : 0,
-            "type" : "string"
+            "type" : "string",
+            "description" : "教材標題"
           },
           "content" : {
             "type" : "string",
+            "description" : "文字內容（type=text 時使用）",
             "nullable" : true
           },
           "videoUrl" : {
             "type" : "string",
+            "description" : "影片網址（type=video 時使用）",
             "format" : "uri",
             "nullable" : true
           },
           "durationSeconds" : {
             "type" : "integer",
+            "description" : "影片長度（秒），type=video 時可選填",
             "format" : "int32",
             "nullable" : true
           }
@@ -554,32 +787,38 @@
         "properties" : {
           "id" : {
             "type" : "string",
+            "description" : "教材唯一識別碼",
             "nullable" : true
           },
           "courseId" : {
             "type" : "string",
+            "description" : "所屬課程 ID",
             "nullable" : true
           },
           "type" : {
             "type" : "string",
-            "description" : "text 或 video",
+            "description" : "教材類型：text（文字）或 video（影片）",
             "nullable" : true
           },
           "title" : {
             "type" : "string",
+            "description" : "教材標題",
             "nullable" : true
           },
           "content" : {
             "type" : "string",
+            "description" : "文字內容（type=text 時有值）",
             "nullable" : true
           },
           "videoUrl" : {
             "type" : "string",
+            "description" : "影片網址（type=video 時有值）",
             "format" : "uri",
             "nullable" : true
           },
           "durationSeconds" : {
             "type" : "integer",
+            "description" : "影片長度（秒）",
             "format" : "int32",
             "nullable" : true
           }
@@ -593,17 +832,19 @@
           "title" : {
             "maxLength" : 100,
             "minLength" : 0,
-            "type" : "string"
+            "type" : "string",
+            "description" : "模組（章節）名稱"
           },
           "order" : {
             "maximum" : 2147483647,
             "minimum" : 1,
             "type" : "integer",
-            "description" : "排序序號（1-based）",
+            "description" : "排序序號（1-based），決定模組顯示順序",
             "format" : "int32"
           },
           "items" : {
             "type" : "array",
+            "description" : "模組內的學習項目列表",
             "nullable" : true,
             "items" : {
               "$ref" : "#/components/schemas/ModuleItemDto"
@@ -619,17 +860,18 @@
           "title" : {
             "maxLength" : 100,
             "minLength" : 0,
-            "type" : "string"
+            "type" : "string",
+            "description" : "項目標題"
           },
           "type" : {
             "minLength" : 1,
             "pattern" : "material|quiz|assignment",
             "type" : "string",
-            "description" : "項目類型"
+            "description" : "項目類型：material（教材）、quiz（測驗）或 assignment（作業）"
           },
           "refId" : {
             "type" : "string",
-            "description" : "對應教材或考試的 Id（可為 null 代表尚未連結）",
+            "description" : "對應資源的 ID（教材/測驗/作業的 ID），可為 null 表示尚未連結",
             "nullable" : true
           }
         },
@@ -640,33 +882,49 @@
         "properties" : {
           "type" : {
             "type" : "string",
+            "description" : "問題類型的 URI 參考",
             "nullable" : true
           },
           "title" : {
             "type" : "string",
+            "description" : "問題的簡短摘要",
             "nullable" : true
           },
           "status" : {
             "type" : "integer",
+            "description" : "HTTP 狀態碼",
             "format" : "int32",
             "nullable" : true
           },
           "detail" : {
             "type" : "string",
+            "description" : "問題的詳細說明",
             "nullable" : true
           },
           "instance" : {
             "type" : "string",
+            "description" : "發生問題的 URI 參考",
             "nullable" : true
           }
         },
         "additionalProperties" : { }
+      },
+      "RefreshRequest" : {
+        "type" : "object",
+        "properties" : {
+          "refreshToken" : {
+            "type" : "string",
+            "description" : "要用來換取新 access token 的 refresh token",
+            "nullable" : true
+          }
+        },
+        "additionalProperties" : false
       }
     },
     "securitySchemes" : {
       "bearerAuth" : {
         "type" : "http",
-        "description" : "輸入格式：Bearer {你的JWT}",
+        "description" : "輸入格式：Bearer {JWT}",
         "scheme" : "bearer",
         "bearerFormat" : "JWT"
       }
