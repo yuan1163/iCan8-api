@@ -1,0 +1,6 @@
+@iCAN8.Api_HostAddress = http://localhost:5043
+
+GET {{iCAN8.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
